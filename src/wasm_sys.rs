@@ -33,6 +33,7 @@ pub enum SysCall {
 
    // Security Syscalls
    ENCRYPT = 50,
+   EMPTY = usize::MAX,
 }
 
 impl From<usize> for SysCall {
@@ -61,6 +62,7 @@ impl From<usize> for SysCall {
          30 => Self::FILE_READ,
          31 => Self::FILE_WRITE,
          50 => Self::ENCRYPT,
+         _ => Self::EMPTY,
       }
    }
 }
