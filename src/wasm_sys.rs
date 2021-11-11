@@ -11,7 +11,7 @@ macro_rules! syscall_enum {
          $($Variant=$Value),*
       }
 
-      impl From<usize> for SysCall {
+      impl core::convert::From<usize> for SysCall {
          fn from(n: usize) -> Self {
             match n {
                $($Value => Self::$Variant),*,
