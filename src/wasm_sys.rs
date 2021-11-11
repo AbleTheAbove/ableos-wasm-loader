@@ -33,7 +33,7 @@ pub enum SysCall {
 
    // Security Syscalls
    ENCRYPT = 50,
-   EMPTY = usize::MAX,
+   EMPTY = u32::MAX as usize,
 }
 
 impl From<usize> for SysCall {

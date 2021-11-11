@@ -12,7 +12,7 @@ pub const KILL: usize = 0;
 struct HostFunctions;
 impl HostFunctions {
    fn check_signature(&self, index: usize, signature: &Signature) -> bool {
-      let (params, ret_ty): (&[ValueType], Option<ValueType>) = match index {
+      let (params, ret_ty): (&[ValueType], Option<ValueType>) = match index.into() {
          SysCall::KILL => (&[ValueType::I32, ValueType::I32], Some(ValueType::I32)),
          _ => return false,
       };
@@ -26,7 +26,7 @@ impl Externals for HostFunctions {
       index: usize,
       args: RuntimeArgs,
    ) -> Result<Option<RuntimeValue>, Trap> {
-      match index {
+      match index.into() {
          SysCall::KILL => {
             let a: u32 = args.nth_checked(0)?;
             let b: u32 = args.nth_checked(1)?;
@@ -41,7 +41,7 @@ impl Externals for HostFunctions {
 impl ModuleImportResolver for HostFunctions {
    fn resolve_func(&self, field_name: &str, signature: &Signature) -> Result<FuncRef, Error> {
       let index = match field_name {
-         "add" => SysCall::KILL,
+         "add" => SysCall::KILL as usize,
          _ => {
             return Err(Error::Instantiation(format!(
                "Export {} not found",
