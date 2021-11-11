@@ -1,7 +1,31 @@
-#[macro_use]
-#[repr(usize)]
-declum! {
-   SysCall,
+macro_rules! syscall {
+   (@get_last $Variant:ident) => {
+      Self::$Variant
+   };
+   (@get_last $Variant:ident, $($VariantTail:ident),*) => {
+      syscall![@get_last $($VariantTail),*]
+   };
+   ($($Variant:ident = $Value:expr,)*) => {
+      #[repr(usize)]
+      pub enum SysCall {
+         $($Variant = $Value),*
+      }
+
+      impl From<usize> for SysCall {
+         fn from(n: usize) -> Self {
+            match n {
+               $($Value => Self::$Variant),*,
+               _ => syscall![@get_last $($Variant),*]
+            }
+         }
+      }
+   };
+   ($($Variant:ident = $Value:expr),* ) => {
+      syscall!($($Variant = $Value,)* );
+   };
+}
+
+syscall! {
    KILL = 0,              // Provide a PID
    CONSOLE_RESET = 1,     // Reset the console
    CONSOLE_IN = 2,        // Console Input
@@ -34,24 +58,6 @@ declum! {
    FILE_WRITE = 31,
 
    // Security Syscalls
-   ENCRYPT = 50;
-   EMPTY = u32::MAX as usize
-}
-
-macro_rules! declum {
-   ($nym:ident, $($variant:ident = $value:expr),*; $catch_all:ident = $max:expr) => {
-      pub enum $nym {
-         $($variant = $value),*
-         $catch_all = $max
-      }
-
-      impl From<usize> for $nym {
-         fn from(n: usize) -> Self {
-            match n {
-               $($value => Self::$variant),*
-               _ => Self::$catch_all
-            }
-         }
-      }
-   };
+   ENCRYPT = 50,
+   EMPTY = 0xFFFF,
 }
