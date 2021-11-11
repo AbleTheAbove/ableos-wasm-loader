@@ -1,9 +1,9 @@
-macro_rules! syscall {
+macro_rules! syscall_enum {
    (@get_last $Variant:ident) => {
       Self::$Variant
    };
    (@get_last $Variant:ident, $($VariantTail:ident),*) => {
-      syscall![@get_last $($VariantTail),*]
+      syscall_enum![@get_last $($VariantTail),*]
    };
    ($($Variant:ident = $Value:expr,)*) => {
       #[repr(usize)]
@@ -15,17 +15,17 @@ macro_rules! syscall {
          fn from(n: usize) -> Self {
             match n {
                $($Value => Self::$Variant),*,
-               _ => syscall![@get_last $($Variant),*]
+               _ => syscall_enum![@get_last $($Variant),*]
             }
          }
       }
    };
    ($($Variant:ident = $Value:expr),* ) => {
-      syscall!($($Variant = $Value,)* );
+      syscall_enum!($($Variant = $Value,)* );
    };
 }
 
-syscall! {
+syscall_enum! {
    KILL = 0,              // Provide a PID
    CONSOLE_RESET = 1,     // Reset the console
    CONSOLE_IN = 2,        // Console Input
