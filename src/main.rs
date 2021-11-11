@@ -2,8 +2,8 @@ extern crate wabt;
 extern crate wasmi;
 
 use wasmi::{
-    Error, Externals, FuncInstance, FuncRef, ImportsBuilder, ModuleImportResolver, ModuleInstance,
-    RuntimeArgs, RuntimeValue, Signature, Trap, ValueType,
+   Error, Externals, FuncInstance, FuncRef, ImportsBuilder, ModuleImportResolver, ModuleInstance,
+   RuntimeArgs, RuntimeValue, Signature, Trap, ValueType,
 };
 
 pub const KILL: usize = 0;
@@ -11,95 +11,97 @@ pub const ADD_FUNC_INDEX: usize = 1;
 
 struct HostFunctions;
 impl HostFunctions {
-    fn check_signature(&self, index: usize, signature: &Signature) -> bool {
-        let (params, ret_ty): (&[ValueType], Option<ValueType>) = match index {
-            ADD_FUNC_INDEX => (&[ValueType::I32, ValueType::I32], Some(ValueType::I32)),
-            _ => return false,
-        };
-        signature.params() == params && signature.return_type() == ret_ty
-    }
+   fn check_signature(&self, index: usize, signature: &Signature) -> bool {
+      let (params, ret_ty): (&[ValueType], Option<ValueType>) = match index {
+         ADD_FUNC_INDEX => (&[ValueType::I32, ValueType::I32], Some(ValueType::I32)),
+         _ => return false,
+      };
+      signature.params() == params && signature.return_type() == ret_ty
+   }
 }
 
 impl Externals for HostFunctions {
-    fn invoke_index(
-        &mut self,
-        index: usize,
-        args: RuntimeArgs,
-    ) -> Result<Option<RuntimeValue>, Trap> {
-        match index {
-            ADD_FUNC_INDEX => {
-                println!("you pe");
-                let a: u32 = args.nth_checked(0)?;
-                let b: u32 = args.nth_checked(1)?;
-                let result = a + b;
+   fn invoke_index(
+      &mut self,
+      index: usize,
+      args: RuntimeArgs,
+   ) -> Result<Option<RuntimeValue>, Trap> {
+      match index {
+         ADD_FUNC_INDEX => {
+            println!("you pe");
+            let a: u32 = args.nth_checked(0)?;
+            let b: u32 = args.nth_checked(1)?;
+            let result = a + b;
 
-                Ok(Some(RuntimeValue::I32(result as i32)))
-            }
-            _ => panic!("Unimplemented function at {}", index),
-        }
-    }
+            Ok(Some(RuntimeValue::I32(result as i32)))
+         }
+         _ => panic!("Unimplemented function at {}", index),
+      }
+   }
 }
 impl ModuleImportResolver for HostFunctions {
-    fn resolve_func(&self, field_name: &str, signature: &Signature) -> Result<FuncRef, Error> {
-        let index = match field_name {
-            "add" => ADD_FUNC_INDEX,
-            _ => {
-                return Err(Error::Instantiation(format!(
-                    "Export {} not found",
-                    field_name
-                )))
-            }
-        };
-
-        if !self.check_signature(index, signature) {
+   fn resolve_func(&self, field_name: &str, signature: &Signature) -> Result<FuncRef, Error> {
+      let index = match field_name {
+         "add" => ADD_FUNC_INDEX,
+         _ => {
             return Err(Error::Instantiation(format!(
-                "Export {} has a bad signature",
-                field_name
-            )));
-        }
+               "Export {} not found",
+               field_name
+            )))
+         }
+      };
 
-        Ok(FuncInstance::alloc_host(
-            Signature::new(&[ValueType::I32, ValueType::I32][..], Some(ValueType::I32)),
-            index,
-        ))
-    }
+      if !self.check_signature(index, signature) {
+         return Err(Error::Instantiation(format!(
+            "Export {} has a bad signature",
+            field_name
+         )));
+      }
+
+      Ok(FuncInstance::alloc_host(
+         Signature::new(&[ValueType::I32, ValueType::I32][..], Some(ValueType::I32)),
+         index,
+      ))
+   }
 }
 
 fn main() {
-    // Parse WAT (WebAssembly Text format) into wasm bytecode.
-    let wasm_binary = wabt::wat2wasm(include_str!("test.wat"));
+   // Parse WAT (WebAssembly Text format) into wasm bytecode.
+   let wasm_binary = wabt::wat2wasm(include_str!("test.wat"));
 
-    let wasm_binary = match wasm_binary {
-        Ok(abc) => abc,
-        Err(abc) => {
-            println!("{}", abc);
-            return;
-        }
-    };
+   let wasm_binary = match wasm_binary {
+      Ok(abc) => abc,
+      Err(abc) => {
+         println!("{}", abc);
+         return;
+      }
+   };
 
-    // .expect("failed to parse wat");
+   // .expect("failed to parse wat");
 
-    // Load wasm binary and prepare it for instantiation.
-    let module = wasmi::Module::from_buffer(&wasm_binary).expect("failed to load wasm");
+   // Load wasm binary and prepare it for instantiation.
+   let module = wasmi::Module::from_buffer(&wasm_binary).expect("failed to load wasm");
 
-    // Instantiate a module with empty imports and
-    // assert that there is no `start` function.
-    let instance = ModuleInstance::new(&module, &ImportsBuilder::default())
-        .expect("failed to instantiate wasm module")
-        .assert_no_start();
+   let imports = ImportsBuilder::new().with_resolver("host", &HostFunctions);
 
-    // Finally, invoke the exported function "test" with no parameters
-    // and empty external function executor.
-    let result: i32 = instance
-        .invoke_export("main", &[], &mut HostFunctions)
-        // .with_resolver(&mut HostFunctions)
-        .expect("failed to execute export")
-        .unwrap()
-        .try_into()
-        .unwrap();
+   // Instantiate a module with empty imports and
+   // assert that there is no `start` function.
+   let instance = ModuleInstance::new(&module, &imports)
+      .expect("failed to instantiate wasm module")
+      .assert_no_start();
 
-    println!(
-        "{:?}",
-        result // .unwrap()
-    );
+   // Finally, invoke the exported function "test" with no parameters
+   // and empty external function executor.
+   let result: i32 = instance
+      .invoke_export("main", &[], &mut HostFunctions)
+      // .with_resolver(&mut HostFunctions)
+      .expect("failed to execute export")
+      .unwrap()
+      .try_into()
+      .unwrap();
+
+   println!(
+      "{:?}",
+      result // .unwrap()
+   );
 }
