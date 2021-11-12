@@ -8,7 +8,8 @@ declum! {
    CONSOLE_OUT = 3,       // Console output
    CONSOLE_GET_TITLE = 4, // Get the console title
    CONSOLE_SET_TITLE = 5, // Set the console title
-
+   GET_PID = 6;           // Get the proccess ID
+   PROCESS_INFO = 7;      // Get information about the process
    //scheduler Related Syscals
    GET_PRIORITY = 10, // Get scheduler priority
    SET_PRIORITY = 11, // Set scheduler priority
@@ -32,6 +33,24 @@ declum! {
 
    FILE_READ = 30,
    FILE_WRITE = 31,
+
+   SLEEP=32, // Sleep in milliseconds
+   SLEEP_UNTIL=33, // Sleep until this time in milliseconds (if this is below the current time return)
+   NANOSLEEP=34, // Sleep in nanoseconds
+   NANOSLEEP_UNTIL=35, // Sleep until this time nanoseconds (if this is below the current time return)
+   GET_TIME = 36,          // Gets the system time (some derivitive of seconds)
+   SET_TIME = 37,          // Sets the system time (some derivitive of seconds)
+
+
+   // Socket SysCall
+   SOCKET_BIND=39, // Used by servers to lock a port
+   SOCKET_CONNECT=40,
+   SOCKET_DISCONNECT=41,
+   SOCKET_SEND=42,
+   SOCKET_RECIEVE=43,
+
+
+
 
    // Security Syscalls
    ENCRYPT = 50;
