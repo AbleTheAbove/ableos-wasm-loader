@@ -14,6 +14,7 @@ impl HostFunctions {
     fn check_signature(&self, index: usize, signature: &Signature) -> bool {
         let (params, ret_ty): (&[ValueType], Option<ValueType>) = match index.into() {
             SysCall::KILL => (&[ValueType::I32, ValueType::I32], Some(ValueType::I32)),
+            SysCall::EMPTY => (&[], None),
             _ => return false,
         };
         signature.params() == params && signature.return_type() == ret_ty
@@ -33,6 +34,7 @@ impl Externals for HostFunctions {
 
                 Ok(Some(RuntimeValue::I32(result as i32)))
             }
+            SysCall::EMPTY => Ok(None),
             // SysCall::CONSOLE_RESET => {}
             // SysCall::CONSOLE_IN => {}
             // SysCall::CONSOLE_OUT => {}
@@ -46,6 +48,7 @@ impl ModuleImportResolver for HostFunctions {
     fn resolve_func(&self, field_name: &str, signature: &Signature) -> Result<FuncRef, Error> {
         let index = match field_name {
             "add" => SysCall::KILL as usize,
+            "empty" => SysCall::EMPTY as usize,
             _ => {
                 return Err(Error::Instantiation(format!(
                     "Export {} not found",
