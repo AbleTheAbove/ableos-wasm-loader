@@ -8,7 +8,7 @@ macro_rules! syscall_enum {
    ($($Variant:ident=$Value:expr,)*) => {
       #[repr(usize)]
       pub enum SysCall {
-         $($Variant=$Value),*
+         $($Variant = $Value),*
       }
 
       impl core::convert::From<usize> for SysCall {
@@ -42,8 +42,6 @@ syscall_enum! {
    SET_HOSTNAME=13,
 
    //File Related syscalls
-   GET_CONFIG=20, // Get config
-   SET_CONFIG=21, // Set the config
    //
    MAKE_DIRECTORY=22,       //
    DELETE_DIRECTORY=23,     //
@@ -71,7 +69,7 @@ syscall_enum! {
    SOCKET_CONNECT=40,
    SOCKET_DISCONNECT=41,
    SOCKET_SEND=42,
-   SOCKET_RECIEVE=43,
+   SOCKET_RECEIVE=43,
 
 
 
