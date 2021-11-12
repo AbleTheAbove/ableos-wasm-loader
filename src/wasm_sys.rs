@@ -1,4 +1,5 @@
 macro_rules! syscall_enum {
+   () => {};
    (@get_last $Variant:ident) => {
       Self::$Variant
    };
@@ -72,9 +73,6 @@ syscall_enum! {
    SOCKET_DISCONNECT=41,
    SOCKET_SEND=42,
    SOCKET_RECIEVE=43,
-
-
-
 
    // Security Syscalls
    ENCRYPT=50,
