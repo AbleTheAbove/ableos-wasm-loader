@@ -74,7 +74,6 @@ syscall_enum! {
    SOCKET_SEND=42,
    SOCKET_RECIEVE=43,
 
-   // Security Syscalls
-   ENCRYPT=50,
+   EXIT=50,
    EMPTY=0xFFFF,
 }
