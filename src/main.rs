@@ -13,7 +13,7 @@ struct HostFunctions;
 impl HostFunctions {
     fn check_signature(&self, index: usize, signature: &Signature) -> bool {
         let (params, ret_ty): (&[ValueType], Option<ValueType>) = match index.into() {
-            SysCall::KILL => (&[ValueType::I32, ValueType::I32], Some(ValueType::I32)),
+            SysCall::KILL => (&[], None),
             SysCall::EMPTY => (&[], None),
             _ => return false,
         };
@@ -27,13 +27,12 @@ impl Externals for HostFunctions {
         args: RuntimeArgs,
     ) -> Result<Option<RuntimeValue>, Trap> {
         match index.into() {
+            /// Take in one arg discard the rest
             SysCall::KILL => {
-                let a: u32 = args.nth_checked(0)?;
-                let b: u32 = args.nth_checked(1)?;
-                let result = a + b;
-
-                Ok(Some(RuntimeValue::I32(result as i32)))
+                println!("hewwo");
+                Ok(None)
             }
+            /// Do nothing
             SysCall::EMPTY => Ok(None),
             // SysCall::CONSOLE_RESET => {}
             // SysCall::CONSOLE_IN => {}
@@ -47,7 +46,7 @@ impl Externals for HostFunctions {
 impl ModuleImportResolver for HostFunctions {
     fn resolve_func(&self, field_name: &str, signature: &Signature) -> Result<FuncRef, Error> {
         let index = match field_name {
-            "add" => SysCall::KILL as usize,
+            "kill" => SysCall::KILL as usize,
             "empty" => SysCall::EMPTY as usize,
             _ => {
                 return Err(Error::Instantiation(format!(
@@ -65,7 +64,7 @@ impl ModuleImportResolver for HostFunctions {
         }
 
         Ok(FuncInstance::alloc_host(
-            Signature::new(&[ValueType::I32, ValueType::I32][..], Some(ValueType::I32)),
+            Signature::new(&[][..], None),
             index,
         ))
     }
@@ -73,22 +72,25 @@ impl ModuleImportResolver for HostFunctions {
 
 fn main() {
     // Parse WAT (WebAssembly Text format) into wasm bytecode.
-    let wasm_binary = wabt::wat2wasm(include_str!("../wasm/test.wat"));
-
-    let wasm_binary = match wasm_binary {
-        Ok(abc) => abc,
-        Err(abc) => {
-            println!("{}", abc);
-            return;
-        }
-    };
-
+    // let wasm_binary = wabt::wat2wasm(include_str!("../wasm/test.wat"));
+    let wasm_binary = //wabt::wat2wasm(
+        include_bytes!("../wasm/ableos-wasm-test.wasm"); //.unwrap();
+                                                         // );
+                                                         /*
+                                                             let wasm_binary = match wasm_binary {
+                                                                 Ok(abc) => abc,
+                                                                 Err(abc) => {
+                                                                     println!("{}", abc);
+                                                                     return;
+                                                                 }
+                                                             };
+                                                         */
     // .expect("failed to parse wat");
 
     // Load wasm binary and prepare it for instantiation.
     let module = wasmi::Module::from_buffer(&wasm_binary).expect("failed to load wasm");
 
-    let imports = ImportsBuilder::new().with_resolver("host", &HostFunctions);
+    let imports = ImportsBuilder::new().with_resolver("env", &HostFunctions);
 
     // Instantiate a module with empty imports and
     // assert that there is no `start` function.
@@ -98,13 +100,13 @@ fn main() {
 
     // Finally, invoke the exported function "test" with no parameters
     // and empty external function executor.
-    let result: i32 = instance
-        .invoke_export("main", &[], &mut HostFunctions)
+    let result = instance
+        .invoke_export("_start", &[], &mut HostFunctions)
         // .with_resolver(&mut HostFunctions)
-        .expect("failed to execute export")
-        .unwrap()
-        .try_into()
-        .unwrap();
+        .expect("failed to execute export");
+    /*.unwrap()
+    .try_into()
+    .unwrap();*/
 
     println!(
         "{:?}",
