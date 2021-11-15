@@ -7,8 +7,6 @@ use wasmi::{
 mod wasm_sys;
 use wasm_sys::SysCall;
 
-pub const KILL: usize = 0;
-
 struct HostFunctions;
 impl HostFunctions {
     fn check_signature(&self, index: usize, signature: &Signature) -> bool {
@@ -76,17 +74,17 @@ fn main() {
     // Parse WAT (WebAssembly Text format) into wasm bytecode.
     // let wasm_binary = wabt::wat2wasm(include_str!("../wasm/test.wat"));
     let wasm_binary = //wabt::wat2wasm(
-        include_bytes!("../src/ableos-wasm-test.wasm"); //.unwrap();
-                                                        // );
-                                                        /*
-                                                            let wasm_binary = match wasm_binary {
-                                                                Ok(abc) => abc,
-                                                                Err(abc) => {
-                                                                    println!("{}", abc);
-                                                                    return;
-                                                                }
-                                                            };
-                                                        */
+        include_bytes!("../wasm/ableos-wasm-test.wasm"); //.unwrap();
+                                                         // );
+                                                         /*
+                                                             let wasm_binary = match wasm_binary {
+                                                                 Ok(abc) => abc,
+                                                                 Err(abc) => {
+                                                                     println!("{}", abc);
+                                                                     return;
+                                                                 }
+                                                             };
+                                                         */
     // .expect("failed to parse wat");
 
     // Load wasm binary and prepare it for instantiation.
