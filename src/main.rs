@@ -34,6 +34,7 @@ impl Externals for HostFunctions {
             }
             /// Do nothing
             SysCall::EMPTY => Ok(None),
+            SysCall::EXIT => Ok(None),
             // SysCall::CONSOLE_RESET => {}
             // SysCall::CONSOLE_IN => {}
             // SysCall::CONSOLE_OUT => {}
@@ -48,6 +49,7 @@ impl ModuleImportResolver for HostFunctions {
         let index = match field_name {
             "kill" => SysCall::KILL as usize,
             "empty" => SysCall::EMPTY as usize,
+            "exit" => SysCall::EXIT as usize,
             _ => {
                 return Err(Error::Instantiation(format!(
                     "Export {} not found",
@@ -74,17 +76,17 @@ fn main() {
     // Parse WAT (WebAssembly Text format) into wasm bytecode.
     // let wasm_binary = wabt::wat2wasm(include_str!("../wasm/test.wat"));
     let wasm_binary = //wabt::wat2wasm(
-        include_bytes!("../wasm/ableos-wasm-test.wasm"); //.unwrap();
-                                                         // );
-                                                         /*
-                                                             let wasm_binary = match wasm_binary {
-                                                                 Ok(abc) => abc,
-                                                                 Err(abc) => {
-                                                                     println!("{}", abc);
-                                                                     return;
-                                                                 }
-                                                             };
-                                                         */
+        include_bytes!("../src/ableos-wasm-test.wasm"); //.unwrap();
+                                                        // );
+                                                        /*
+                                                            let wasm_binary = match wasm_binary {
+                                                                Ok(abc) => abc,
+                                                                Err(abc) => {
+                                                                    println!("{}", abc);
+                                                                    return;
+                                                                }
+                                                            };
+                                                        */
     // .expect("failed to parse wat");
 
     // Load wasm binary and prepare it for instantiation.
