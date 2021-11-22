@@ -1,4 +1,4 @@
-use wabt;
+// use wabt;
 use wasmi::{
     Error, Externals, FuncInstance, FuncRef, ImportsBuilder, ModuleImportResolver, ModuleInstance,
     RuntimeArgs, RuntimeValue, Signature, Trap, ValueType,
@@ -33,11 +33,11 @@ impl Externals for HostFunctions {
             /// Do nothing
             SysCall::EMPTY => Ok(None),
             SysCall::EXIT => Ok(None),
-            // SysCall::CONSOLE_RESET => {}
-            // SysCall::CONSOLE_IN => {}
-            // SysCall::CONSOLE_OUT => {}
-            // SysCall::CONSOLE_GET_TITLE => {}
-            // SysCall::CONSOLE_SET_TITLE => {}
+            SysCall::CONSOLE_RESET => Ok(None),
+            SysCall::CONSOLE_IN => Ok(None),
+            SysCall::CONSOLE_OUT => Ok(None),
+            SysCall::CONSOLE_GET_TITLE => Ok(None),
+            SysCall::CONSOLE_SET_TITLE => Ok(None),
             _ => panic!("Unimplemented function at {}", index),
         }
     }
@@ -71,21 +71,10 @@ impl ModuleImportResolver for HostFunctions {
 }
 
 fn main() {
-    // Parse WAT (WebAssembly Text format) into wasm bytecode.
-    // let wasm_binary = wabt::wat2wasm(include_str!("../wasm/test.wat"));
-    let wasm_binary = //wabt::wat2wasm(
-        include_bytes!("../wasm/ableos-wasm-test.wasm"); //.unwrap();
-                                                         // );
-                                                         /*
-                                                             let wasm_binary = match wasm_binary {
-                                                                 Ok(abc) => abc,
-                                                                 Err(abc) => {
-                                                                     println!("{}", abc);
-                                                                     return;
-                                                                 }
-                                                             };
-                                                         */
-    // .expect("failed to parse wat");
+    let wasm_binary = include_bytes!("../wasm/rust.wasm");
+    // include_bytes!("../wasm/zig.wasm");
+    // include_bytes!("../wasm/c.wasm");
+    // include_bytes!("../wasm/wasm.wasm");
 
     // Load wasm binary and prepare it for instantiation.
     let module = wasmi::Module::from_buffer(&wasm_binary).expect("failed to load wasm");
